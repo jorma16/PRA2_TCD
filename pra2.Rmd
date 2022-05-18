@@ -5,15 +5,15 @@ author:
   - "Rafael Jiménez Sarmentero"
 date: "mayo 2022"
 output:
+  pdf_document:
+    highlight: zenburn
+    toc: yes
   html_document:
     highlight: default
     number_sections: yes
     theme: cosmo
     toc: yes
     toc_depth: 3
-  pdf_document:
-    highlight: zenburn
-    toc: yes
   word_document: default
 ---
 
@@ -24,14 +24,49 @@ knitr::opts_chunk$set(echo = TRUE)
 ******
 #  Descripción del dataset. ¿Por qué es importante y qué pregunta/problema pretende responder?
 ******
+El dataset elegido para la realización de la práctica ha sido el de [Titanic](https://www.kaggle.com/competitions/titanic/overview) que contiene una serie de datos sobre los pasajeros del Titanic, entre otras cosas, si finalmente sobrevivieron o no, los datos se dividen en varios ficheros `train.csv` y `test.csv`, además de un tercer fichero `gender_submission.csv` que para la realizacion de esta práctica no es necesario, ya que es un ejemplo de fichero de envio para la competición, de Kaggle. A nosotros nos interesa el fichero de `train.csv`, sobre el cual vamos a realizar las tareas de limpieza y análisis.
+
+Con este dataset se podrían encontrar relaciones entre supervivencia y edad, o supervivencia y género, entre otras, o se podría utilizar para entrenar un modelo capaz de predecir, si una persona con unas características determinadas sobrevivió al accidente o no.
+```{r}
+data <- read.csv("./input_files/train.csv", header = TRUE, stringsAsFactors = FALSE)
+dim(data)
+head(data)
+```
+Podemos observar que el dataset contiene 891 filas y 12 atributos, a continuación vamos a ver los tipos de atributos y su significado
+```{r}
+str(data)
+```
+Los atributos que encontramos son:
+* **PassengerId**: Es el identificador interno del pasajero, de tipo entero
+* **Survived**: Es un valor de tipo entero que nos indica si el pasajero ha sobrevivido o no (0 o 1)
+* **Pclass**: El tipo de billete que ha adquirido el pasajero, tipo entero	(1 = Primera, 2 = Segunda, 3 = Tercera)
+* **Name**: El nombre del pasajero, tipo char
+* **Sex**: El género del pasajero, tipo char (male o female)
+* **Age**: La edad del pasajero, tipo number
+* **SibSp**: El numero de hermanos y conyuges que hay abordo en el Titanic, tipo entero
+* **Parch**: El número de padres e hijos que hay abordo en el Titanic, tipo entero
+* **Ticket**: El identificador del billete, tipo char
+* **Fare**: El precio del billete, tipo number
+* **Cabin**: El código del camarote, tipo char
+* **Embarked**: El puerto donde embarco el pasajero, tipo char (C = Cherbourg, Q = Queenstown, S = Southampton)
 
 ******
 # Integración y selección de los datos de interés a analizar. Puede ser el resultado de  adicionar diferentes datasets o una subselección útil de los datos originales, en base al  objetivo que se quiera conseguir.
 ******
-
+De los atributos presentados, sin realizar ningún trabajo previo, consideramos que la siguiente lista de atributos no es relevante para el analisis estadistico que queremos llevar a cabo.
+* **PassengerId**: La podemos eliminar del conjunto de datos ya que no contribuye a la supervivencia del pasajero
+* **Ticket**: Por los mismos de PassengerId, consideramos que los identificadores internos no afectan a la supervivencia
+* **Name**: Por si solo el nombre del pasajero creemos que no aporta nada a la supervivencia del mismo, sin embargo observamos que todos los nombres siguen un formato determinado y que todos contienen el titulo que se aplica a la persona, por lo tanto podriamos extraer esta característica para contar con un dataset con más información con la que trabajar.
+* **Cabin**: Del camarote podemos llegar a saber que pasajeros viajaban en el mismo y si han sobrevivido o no, por lo tanto podemos saber si el camarote o el tipo de camarote estan relacionados con una mayor supervivencia.
+* **SibSp y Parch**: De estas dos variables podemos extraer una sola, que hace referencia al numero de familiares que el pasajero tenia a bordo.
+ 
 ******
 # Limpieza de los datos.
 ******
+En primer lugar, deberiamos reemplazar los valores que consideramos vacios por `NA`
+```{r}
+length(data[data$Sex == "",]$Sex)
+```
 
 ## ¿Los datos contienen ceros o elementos vacíos? Gestiona cada uno de estos casos.
 
