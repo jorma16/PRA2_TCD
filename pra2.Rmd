@@ -1,0 +1,56 @@
+---
+title: 'Tipología y ciclo de vida de los datos: Práctica 2'
+author: 
+  - "Jorge Marchán Gutiérrez"
+  - "Rafael Jiménez Sarmentero"
+date: "mayo 2022"
+output:
+  html_document:
+    highlight: default
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+    toc_depth: 3
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+  word_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+******
+#  Descripción del dataset. ¿Por qué es importante y qué pregunta/problema pretende responder?
+******
+
+******
+# Integración y selección de los datos de interés a analizar. Puede ser el resultado de  adicionar diferentes datasets o una subselección útil de los datos originales, en base al  objetivo que se quiera conseguir.
+******
+
+******
+# Limpieza de los datos.
+******
+
+## ¿Los datos contienen ceros o elementos vacíos? Gestiona cada uno de estos casos.
+
+## Identifica y gestiona los valores extremos.
+
+******
+# Análisis de los datos.
+******
+
+## Selección de los grupos de datos que se quieren analizar/comparar (p. e., si se  van a comparar grupos de datos, ¿cuáles son estos grupos y qué tipo de análisis se van a aplicar?)
+
+## Comprobación de la normalidad y homogeneidad de la varianza.
+
+## Aplicación de pruebas estadísticas para comparar los grupos de datos. En función de los datos y el objetivo del estudio, aplicar pruebas de contraste de hipótesis, correlaciones, regresiones, etc. Aplicar al menos tres métodos de análisis diferentes.
+
+******
+# Representación de los resultados a partir de tablas y gráficas. Este apartado se puede responder a lo largo de la práctica, sin necesidad de concentrar todas las representaciones en este punto de la práctica.
+******
+
+******
+# Resolución del problema. A partir de los resultados obtenidos, ¿cuáles son las conclusiones? ¿Los resultados permiten responder al problema?
+******
