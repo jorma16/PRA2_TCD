@@ -440,14 +440,14 @@ que contiene una serie de datos sobre los pasajeros del Titanic, entre
 otras cosas, si finalmente sobrevivieron o no, los datos se dividen en
 varios ficheros <code>train.csv</code> y <code>test.csv</code>, además
 de un tercer fichero <code>gender_submission.csv</code> que para la
-realizacion de esta práctica no es necesario, ya que es un ejemplo de
-fichero de envio para la competición, de Kaggle. A nosotros nos interesa
+realización de esta práctica no es necesario, ya que es un ejemplo de
+fichero de envío para la competición, de Kaggle. A nosotros nos interesa
 el fichero de <code>train.csv</code>, sobre el cual vamos a realizar las
 tareas de limpieza y análisis.</p>
-<p>Con este dataset se podrían encontrar relaciones entre supervivencia
-y edad, o supervivencia y género, entre otras, o se podría utilizar para
-entrenar un modelo capaz de predecir, si una persona con unas
-características determinadas sobrevivió al accidente o no.</p>
+<p>Con este <em>dataset</em> se podrían encontrar relaciones entre
+supervivencia y edad, o supervivencia y género, entre otras, o se podría
+utilizar para entrenar un modelo capaz de predecir, si una persona con
+unas características determinadas sobrevivió al accidente o no.</p>
 <pre class="r"><code>data &lt;- read.csv(&quot;./input_files/train.csv&quot;, header = TRUE, stringsAsFactors = FALSE)
 dim(data)</code></pre>
 <pre><code>## [1] 891  12</code></pre>
@@ -473,8 +473,9 @@ dim(data)</code></pre>
 ## 4           113803 53.1000  C123        S
 ## 5           373450  8.0500              S
 ## 6           330877  8.4583              Q</code></pre>
-<p>Podemos observar que el dataset contiene 891 filas y 12 atributos, a
-continuación vamos a ver los tipos de atributos y su significado</p>
+<p>Podemos observar que el <em>dataset</em> contiene 891 filas y 12
+atributos, a continuación vamos a ver los tipos de atributos y su
+significado</p>
 <pre class="r"><code>str(data)</code></pre>
 <pre><code>## &#39;data.frame&#39;:    891 obs. of  12 variables:
 ##  $ PassengerId: int  1 2 3 4 5 6 7 8 9 10 ...
@@ -489,22 +490,29 @@ continuación vamos a ver los tipos de atributos y su significado</p>
 ##  $ Fare       : num  7.25 71.28 7.92 53.1 8.05 ...
 ##  $ Cabin      : chr  &quot;&quot; &quot;C85&quot; &quot;&quot; &quot;C123&quot; ...
 ##  $ Embarked   : chr  &quot;S&quot; &quot;C&quot; &quot;S&quot; &quot;S&quot; ...</code></pre>
-<p>Los atributos que encontramos son: * <strong>PassengerId</strong>: Es
-el identificador interno del pasajero, de tipo entero *
-<strong>Survived</strong>: Es un valor de tipo entero que nos indica si
-el pasajero ha sobrevivido o no (0 o 1) * <strong>Pclass</strong>: El
-tipo de billete que ha adquirido el pasajero, tipo entero (1 = Primera,
-2 = Segunda, 3 = Tercera) * <strong>Name</strong>: El nombre del
-pasajero, tipo char * <strong>Sex</strong>: El género del pasajero, tipo
-char (male o female) * <strong>Age</strong>: La edad del pasajero, tipo
-number * <strong>SibSp</strong>: El numero de hermanos y conyuges que
-hay abordo en el Titanic, tipo entero * <strong>Parch</strong>: El
-número de padres e hijos que hay abordo en el Titanic, tipo entero *
-<strong>Ticket</strong>: El identificador del billete, tipo char *
-<strong>Fare</strong>: El precio del billete, tipo number *
-<strong>Cabin</strong>: El código del camarote, tipo char *
-<strong>Embarked</strong>: El puerto donde embarco el pasajero, tipo
-char (C = Cherbourg, Q = Queenstown, S = Southampton)</p>
+<p>Los atributos que encontramos son:</p>
+<ul>
+<li><strong>PassengerId</strong>: Es el identificador interno del
+pasajero, de tipo entero</li>
+<li><strong>Survived</strong>: Es un valor de tipo entero que nos indica
+si el pasajero ha sobrevivido o no (0 o 1)</li>
+<li><strong>Pclass</strong>: El tipo de billete que ha adquirido el
+pasajero, tipo entero (1 = Primera, 2 = Segunda, 3 = Tercera)</li>
+<li><strong>Name</strong>: El nombre del pasajero, tipo char</li>
+<li><strong>Sex</strong>: El género del pasajero, tipo char (male o
+female)</li>
+<li><strong>Age</strong>: La edad del pasajero, tipo number</li>
+<li><strong>SibSp</strong>: El numero de hermanos y conyuges que hay
+abordo en el Titanic, tipo entero</li>
+<li><strong>Parch</strong>: El número de padres e hijos que hay abordo
+en el Titanic, tipo entero</li>
+<li><strong>Ticket</strong>: El identificador del billete, tipo
+char</li>
+<li><strong>Fare</strong>: El precio del billete, tipo number</li>
+<li><strong>Cabin</strong>: El código del camarote, tipo char</li>
+<li><strong>Embarked</strong>: El puerto donde embarco el pasajero, tipo
+char (C = Cherbourg, Q = Queenstown, S = Southampton)</li>
+</ul>
 <hr />
 </div>
 <div id="integración-y-selección-de-los-datos-de-interés-a-analizar.-puede-ser-el-resultado-de-adicionar-diferentes-datasets-o-una-subselección-útil-de-los-datos-originales-en-base-al-objetivo-que-se-quiera-conseguir." class="section level1" number="2">
@@ -513,6 +521,28 @@ de los datos de interés a analizar. Puede ser el resultado de adicionar
 diferentes datasets o una subselección útil de los datos originales, en
 base al objetivo que se quiera conseguir.</h1>
 <hr />
+<p>De los atributos presentados, sin realizar ningún trabajo previo,
+consideramos que la siguiente lista de atributos no es relevante para el
+análisis estadístico que queremos llevar a cabo:</p>
+<ul>
+<li><strong>PassengerId</strong>: La podemos eliminar del conjunto de
+datos ya que no contribuye a la supervivencia del pasajero</li>
+<li><strong>Ticket</strong>: Por los mismos de PassengerId, consideramos
+que los identificadores internos no afectan a la supervivencia</li>
+<li><strong>Name</strong>: Por si solo el nombre del pasajero creemos
+que no aporta nada a la supervivencia del mismo, sin embargo observamos
+que todos los nombres siguen un formato determinado y que todos
+contienen el titulo que se aplica a la persona, por lo tanto podríamos
+extraer esta característica para contar con un <em>dataset</em> con más
+información con la que trabajar.</li>
+<li><strong>Cabin</strong>: Del camarote podemos llegar a saber que
+pasajeros viajaban en el mismo y si han sobrevivido o no, por lo tanto
+podemos saber si el camarote o el tipo de camarote estan relacionados
+con una mayor supervivencia.</li>
+<li><strong>SibSp y Parch</strong>: De estas dos variables podemos
+extraer una sola, que hace referencia al numero de familiares que el
+pasajero tenia a bordo.</li>
+</ul>
 <hr />
 </div>
 <div id="limpieza-de-los-datos." class="section level1" number="3">
@@ -522,6 +552,23 @@ datos.</h1>
 <div id="los-datos-contienen-ceros-o-elementos-vacíos-gestiona-cada-uno-de-estos-casos." class="section level2" number="3.1">
 <h2><span class="header-section-number">3.1</span> ¿Los datos contienen
 ceros o elementos vacíos? Gestiona cada uno de estos casos.</h2>
+<p>En primer lugar, deberíamos reemplazar los valores que consideramos
+vacíos por <code>NA</code>.</p>
+<p>Comprobamos qué columnas presentan valores vacíos:</p>
+<pre class="r"><code>colSums(data == &quot;&quot;)</code></pre>
+<pre><code>## PassengerId    Survived      Pclass        Name         Sex         Age 
+##           0           0           0           0           0          NA 
+##       SibSp       Parch      Ticket        Fare       Cabin    Embarked 
+##           0           0           0           0         687           2</code></pre>
+<p>Y los sustituimos por <code>NA</code>:</p>
+<pre class="r"><code>data$Cabin[data$Cabin == &quot;&quot;] &lt;- NA
+data$Embarked[data$Embarked == &quot;&quot;] &lt;- NA</code></pre>
+<p>Comprobamos ahora cuántos datos vacíos (NA) tiene cada atributo:</p>
+<pre class="r"><code>colSums(is.na(data))</code></pre>
+<pre><code>## PassengerId    Survived      Pclass        Name         Sex         Age 
+##           0           0           0           0           0         177 
+##       SibSp       Parch      Ticket        Fare       Cabin    Embarked 
+##           0           0           0           0         687           2</code></pre>
 </div>
 <div id="identifica-y-gestiona-los-valores-extremos." class="section level2" number="3.2">
 <h2><span class="header-section-number">3.2</span> Identifica y gestiona
