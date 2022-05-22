@@ -5,15 +5,15 @@ author:
   - "Rafael Jiménez Sarmentero"
 date: "mayo 2022"
 output:
+  pdf_document:
+    highlight: zenburn
+    toc: yes
   html_document:
     highlight: default
     number_sections: yes
     theme: cosmo
     toc: yes
     toc_depth: 3
-  pdf_document:
-    highlight: zenburn
-    toc: yes
   word_document: default
 ---
 
@@ -74,14 +74,6 @@ De los atributos presentados, sin realizar ningún trabajo previo, consideramos 
 
 ## ¿Los datos contienen ceros o elementos vacíos? Gestiona cada uno de estos casos.
 
-En primer lugar, deberíamos reemplazar los valores que consideramos vacíos por `NA`.
-
-Comprobamos qué columnas presentan valores vacíos:
-
-```{r}
-colSums(data == "")
-```
-
 Del análisis del fichero que contiene el dataset `train.csv` podemos extraer la siguiente información:
 
 1. Algunas cadenas de caracteres tienen espacios en blanco al inicio y/o final.
@@ -89,12 +81,20 @@ Del análisis del fichero que contiene el dataset `train.csv` podemos extraer la
 3. La edad puede contener valores decimales al ser de tipo number y no entero.
 4. El separador de columnas es el caracter ",".
 
-En primer lugar, deberiamos reemplazar los valores que consideramos vacios por `NA`
+Para la limpieza de los datos resulta interesante conocer que atributos contienen valores vacios
 ```{r}
-length(data[data$Sex == "",]$Sex)
+colSums(data == "")
 ```
 
-Y los sustituimos por `NA`:
+Con esta información y con lo que conocemos del dataset podemos concluir que las siguientes transformaciones serían interesantes con el objetivo de facilitar el análisis:
+
+1. El atributo `Survived` debería ser un factor debido a que es cualitativa con valores `1` y `0`
+2. El atributo `Pclass` debería ser un factor debido a que es cualitativa con valores `1`, `2` y `3`
+3. El atributo `Sex` debería ser un factor debido a que es cualitativa con valores `male` y `female`
+4. El atributo `Embarked` debería ser un factor debido a que es cualitativa con valores `C`, `Q` y `S`, además de que deberiamos cambiar los valores vacios por `NA`
+5. El atributo `Cabin` contiene valores vacios por lo que hay que reemplazarlos por `NA`.
+
+En primer lugar, deberiamos reemplazar los valores que consideramos vacios por `NA`
 
 ```{r}
 data$Cabin[data$Cabin == ""] <- NA
@@ -107,13 +107,88 @@ Comprobamos ahora cuántos datos vacíos (NA) tiene cada atributo:
 colSums(is.na(data))
 ```
 
+```{r}
+data$Survived <- as.factor(data$Survived)
+data$Pclass <- as.factor(data$Pclass)
+data$Sex <- as.factor(data$Sex)
+data$Embarked <- as.factor(data$Embarked)
+
+str(data)
+```
+Podemos extraer un atributo nuevo que nos indique el tamaño de la familia que viaja a bordo de cada pasajero, de cara al analisis posterior es más interesante tener el dato agrupado en un único atributo que en varios.
+
+```{r}
+data$Fnumber <- data$SibSp + data$Parch
+data$SibSp <- NULL
+data$Parch <- NULL
+```
+Vamos a comprobar visualmente si puede existir una relacion entre la variable `Survived` y el número de familiares
+
+```{r}
+if (!require('ggplot2')) install.packages('ggplot2'); library('ggplot2')
+
+ggplot(data, aes(x = Fnumber, fill = factor(Survived))) + 
+  geom_bar(stat='count', position='dodge') +
+  scale_x_continuous(breaks=c(1:11)) +
+  labs(x = 'Family Number')
+```
+Observando los resultados nos damos cuenta de que los pasajeros que viajaban solos tenian más probabilidades de no sobrevivir que de sobrevivir, así como también ocurre con los pasajeros de más de 3 familiares a bordo, por lo que podemos crear tres categorias.
+
+```{r}
+data$Ftype[data$Fnumber == 0] <- 'single'
+data$Ftype[data$Fnumber < 4 & data$Fnumber > 0] <- 'small'
+data$Ftype[data$Fnumber >= 4] <- 'large'
+
+data$Ftype <- as.factor(data$Ftype)
+```
+
 ## Identifica y gestiona los valores extremos.
+Tenemos tres atributos numéricos: `Age`, `Fare` y `Fnumber` a continuación vamos a visualizar con boxplot cada una de las variables y a realizar su análisis para determinar si los valores extremos son correctos o son fallos.
+```{r}
+boxplot(data$Age, main="Age")
+boxplot.stats(data$Age)$out
+```
+Del atributo `Age` nos muestra que los valores extremos son aquellos que están por encima de 66 años, sin embargo no observamos ningun valor que aparentemente sea incorrecto, podemos extraer la conclusion de que era raro ver pasajeros de más de 66 años, por lo tanto estos datos no necesitan ser tratados.
+
+Vamos a analizar ahora los valores extremos del atributo `Fare`
+```{r}
+boxplot(data$Fare, main="Fare")
+```
+En un primer lugar observamos los valores extremos del atributo `Fare` y vemos que por encima de 90 se consideran outliers, sin embargo el precio del billete depende de la clase del billete y hay menos de primera clase que del resto, por lo tanto es probable que los billetes de primera clase se consideren valores extremos, veamos los boxplot, por clase y marcando el límite para ser outliers en el atributo `Fare`
+```{r}
+ggplot(data, aes(x=Pclass, y=Fare)) + 
+  geom_boxplot() +
+  geom_hline(aes(yintercept=80), colour='red')
+print(data[data$Fare > 200,])
+```
+Observamos como los valores considerados outliers para `Fare` están asociados con la clase en la que viajan, mientras más alta es la clase y mayor numero de pasajeros por billete, más alta es la tarifa, por lo tanto, los valores extremos en este atributo, son valores que consideramos válidos.
+
+```{r}
+boxplot(data$Fnumber, main="Family Number")
+boxplot.stats(data$Fnumber)$out
+```
+Observamos como el boxplot nos cataloga como valores extremos todos aquellos pasajeros que viajasen con 3 familiares más, sin embargo no parece ser un dato incorrecto, quizá 10 familiares es un poco sospechoso, veamos los pasajeros con Fnumber = 10 existentes en el dataset
+```{r}
+data[data$Fnumber == 10,]
+```
+Aquí podemos observar como todos los pasajeros que viajaban con 10 familiares, eran familia, compartian billete y tarifa, por lo que los valores outliers de `Fnumber` son correctos.
 
 ******
 # Análisis de los datos.
 ******
 
 ## Selección de los grupos de datos que se quieren analizar/comparar (p. e., si se  van a comparar grupos de datos, ¿cuáles son estos grupos y qué tipo de análisis se van a aplicar?)
+
+Como se ha comentado al principio, vamos a trabajar con el conjunto de datos de entrenamiento y vamos a analizar la relacion que hay con la supervivencia, de los atributos `Pclass`, `Sex`, `Embarked` y `Ftype`.
+
+### Relacion entre Survived y Pclass
+```{r}
+frequency_table <- table(data$Survived, data$Pclass, dnn = c("Survived", "Pclass"))
+proportions_table <- prop.table(frequency_table)
+percentages_table <- round((proportions_table * 100), 2)
+addmargins(percentages_table)
+```
+De esta tabla de porcentajes llegamos a la conclusión de que los pasajeros que viajaban en tercera clase tenian menos posibilidades de supervivencia que los que iban en segunda y estos, menos que los que iban en primera, siendo los pasajeros de primera clase los únicos que tenian una probabilidad mayor de sobrevivir que de no sobrevivir, por lo tanto, podemos afirmar que hay una relacion entre la clase en la que se viajaba y la supervivencia.
 
 ## Comprobación de la normalidad y homogeneidad de la varianza.
 
