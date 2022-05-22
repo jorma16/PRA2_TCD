@@ -67,8 +67,7 @@ De los atributos presentados, sin realizar ningún trabajo previo, consideramos 
 * **Name**: Por si solo el nombre del pasajero creemos que no aporta nada a la supervivencia del mismo, sin embargo observamos que todos los nombres siguen un formato determinado y que todos contienen el titulo que se aplica a la persona, por lo tanto podríamos extraer esta característica para contar con un *dataset* con más información con la que trabajar.
 * **Cabin**: Del camarote podemos llegar a saber que pasajeros viajaban en el mismo y si han sobrevivido o no, por lo tanto podemos saber si el camarote o el tipo de camarote estan relacionados con una mayor supervivencia.
 * **SibSp y Parch**: De estas dos variables podemos extraer una sola, que hace referencia al numero de familiares que el pasajero tenia a bordo.
- 
-******
+
 # Limpieza de los datos.
 ******
 
@@ -80,6 +79,16 @@ Comprobamos qué columnas presentan valores vacíos:
 
 ```{r}
 colSums(data == "")
+Del análisis del fichero que contiene el dataset `train.csv` podemos extraer la siguiente información:
+
+1. Algunas cadenas de caracteres tienen espacios en blanco al inicio y/o final.
+2. Los valores decimales están separados por el caracter ".".
+3. La edad puede contener valores decimales al ser de tipo number y no entero.
+4. El separador de columnas es el caracter ",".
+
+En primer lugar, deberiamos reemplazar los valores que consideramos vacios por `NA`
+```{r}
+length(data[data$Sex == "",]$Sex)
 ```
 
 Y los sustituimos por `NA`:
