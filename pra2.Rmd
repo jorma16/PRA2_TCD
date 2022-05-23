@@ -65,8 +65,8 @@ De los atributos presentados, sin realizar ningún trabajo previo, consideramos 
 * **PassengerId**: La podemos eliminar del conjunto de datos ya que no contribuye a la supervivencia del pasajero
 * **Ticket**: Por los mismos de PassengerId, consideramos que los identificadores internos no afectan a la supervivencia
 * **Name**: Por si solo el nombre del pasajero creemos que no aporta nada a la supervivencia del mismo, sin embargo observamos que todos los nombres siguen un formato determinado y que todos contienen el titulo que se aplica a la persona, por lo tanto podríamos extraer esta característica para contar con un *dataset* con más información con la que trabajar.
-* **Cabin**: Del camarote podemos llegar a saber que pasajeros viajaban en el mismo y si han sobrevivido o no, por lo tanto podemos saber si el camarote o el tipo de camarote estan relacionados con una mayor supervivencia.
-* **SibSp y Parch**: De estas dos variables podemos extraer una sola, que hace referencia al numero de familiares que el pasajero tenia a bordo.
+* **Cabin**: Del camarote podemos llegar a saber qué pasajeros viajaban en el mismo y si han sobrevivido o no, por lo tanto podemos saber si el camarote o el tipo de camarote están relacionados con una mayor supervivencia.
+* **SibSp y Parch**: Estas dos variables podemos condensarlas en una sola, que hace referencia al número de familiares que el pasajero tenía a bordo.
 
 ******
 # Limpieza de los datos.
@@ -74,27 +74,28 @@ De los atributos presentados, sin realizar ningún trabajo previo, consideramos 
 
 ## ¿Los datos contienen ceros o elementos vacíos? Gestiona cada uno de estos casos.
 
-Del análisis del fichero que contiene el dataset `train.csv` podemos extraer la siguiente información:
+Del análisis del fichero que contiene el *dataset* `train.csv` podemos extraer la siguiente información:
 
 1. Algunas cadenas de caracteres tienen espacios en blanco al inicio y/o final.
-2. Los valores decimales están separados por el caracter ".".
+2. Los valores decimales están separados por el carácter ".".
 3. La edad puede contener valores decimales al ser de tipo number y no entero.
-4. El separador de columnas es el caracter ",".
+4. El separador de columnas es el carácter ",".
 
-Para la limpieza de los datos resulta interesante conocer que atributos contienen valores vacios
+Para la limpieza de los datos resulta interesante conocer qué atributos contienen valores vacíos:
+
 ```{r}
 colSums(data == "")
 ```
 
-Con esta información y con lo que conocemos del dataset podemos concluir que las siguientes transformaciones serían interesantes con el objetivo de facilitar el análisis:
+Con esta información y con lo que conocemos del *dataset* podemos concluir que las siguientes transformaciones serían interesantes con el objetivo de facilitar el análisis:
 
 1. El atributo `Survived` debería ser un factor debido a que es cualitativa con valores `1` y `0`
 2. El atributo `Pclass` debería ser un factor debido a que es cualitativa con valores `1`, `2` y `3`
 3. El atributo `Sex` debería ser un factor debido a que es cualitativa con valores `male` y `female`
-4. El atributo `Embarked` debería ser un factor debido a que es cualitativa con valores `C`, `Q` y `S`, además de que deberiamos cambiar los valores vacios por `NA`
-5. El atributo `Cabin` contiene valores vacios por lo que hay que reemplazarlos por `NA`.
+4. El atributo `Embarked` debería ser un factor debido a que es cualitativa con valores `C`, `Q` y `S`, además de que deberíamos cambiar los valores vacíos por `NA`
+5. El atributo `Cabin` contiene valores vacíos por lo que hay que reemplazarlos por `NA`.
 
-En primer lugar, deberiamos reemplazar los valores que consideramos vacios por `NA`
+En primer lugar, deberíamos reemplazar los valores que consideramos vacíos por `NA`:
 
 ```{r}
 data$Cabin[data$Cabin == ""] <- NA
@@ -115,14 +116,16 @@ data$Embarked <- as.factor(data$Embarked)
 
 str(data)
 ```
-Podemos extraer un atributo nuevo que nos indique el tamaño de la familia que viaja a bordo de cada pasajero, de cara al analisis posterior es más interesante tener el dato agrupado en un único atributo que en varios.
+
+Podemos incluir un atributo nuevo que nos indique el tamaño de la familia que viaja a bordo de cada pasajero. De cara al análisis posterior es más interesante tener el dato agrupado en un único atributo que en varios.
 
 ```{r}
 data$Fnumber <- data$SibSp + data$Parch
 data$SibSp <- NULL
 data$Parch <- NULL
 ```
-Vamos a comprobar visualmente si puede existir una relacion entre la variable `Survived` y el número de familiares
+
+Vamos a comprobar visualmente si puede existir una relación entre la variable `Survived` y el número de familiares:
 
 ```{r}
 if (!require('ggplot2')) install.packages('ggplot2'); library('ggplot2')
@@ -132,7 +135,8 @@ ggplot(data, aes(x = Fnumber, fill = factor(Survived))) +
   scale_x_continuous(breaks=c(1:11)) +
   labs(x = 'Family Number')
 ```
-Observando los resultados nos damos cuenta de que los pasajeros que viajaban solos tenian más probabilidades de no sobrevivir que de sobrevivir, así como también ocurre con los pasajeros de más de 3 familiares a bordo, por lo que podemos crear tres categorias.
+
+Observando los resultados nos damos cuenta de que los pasajeros que viajaban solos tenían más probabilidades de no sobrevivir que de sobrevivir, así como también ocurre con los pasajeros de más de 3 familiares a bordo, por lo que podemos crear tres categorías:
 
 ```{r}
 data$Ftype[data$Fnumber == 0] <- 'single'
@@ -143,35 +147,46 @@ data$Ftype <- as.factor(data$Ftype)
 ```
 
 ## Identifica y gestiona los valores extremos.
-Tenemos tres atributos numéricos: `Age`, `Fare` y `Fnumber` a continuación vamos a visualizar con boxplot cada una de las variables y a realizar su análisis para determinar si los valores extremos son correctos o son fallos.
+
+Tenemos tres atributos numéricos: `Age`, `Fare` y `Fnumber`. A continuación vamos a visualizar con boxplot cada una de las variables y a realizar su análisis para determinar si los valores extremos son correctos o son fallos:
+
 ```{r}
 boxplot(data$Age, main="Age")
 boxplot.stats(data$Age)$out
 ```
-Del atributo `Age` nos muestra que los valores extremos son aquellos que están por encima de 66 años, sin embargo no observamos ningun valor que aparentemente sea incorrecto, podemos extraer la conclusion de que era raro ver pasajeros de más de 66 años, por lo tanto estos datos no necesitan ser tratados.
 
-Vamos a analizar ahora los valores extremos del atributo `Fare`
+El atributo `Age` nos muestra que los valores extremos son aquellos que están por encima de 66 años. Sin embargo, no observamos ningún valor que aparentemente sea incorrecto. Podemos extraer la conclusión de que era raro ver pasajeros de más de 66 años, pero estos datos no necesitan ser tratados.
+
+Vamos a analizar ahora los valores extremos del atributo `Fare`:
+
 ```{r}
 boxplot(data$Fare, main="Fare")
 ```
-En un primer lugar observamos los valores extremos del atributo `Fare` y vemos que por encima de 90 se consideran outliers, sin embargo el precio del billete depende de la clase del billete y hay menos de primera clase que del resto, por lo tanto es probable que los billetes de primera clase se consideren valores extremos, veamos los boxplot, por clase y marcando el límite para ser outliers en el atributo `Fare`
+
+En un primer lugar observamos los valores extremos del atributo `Fare` y vemos que por encima de 90 se consideran *outliers*. Sin embargo, el precio del billete depende de la clase del mismo, y hay menos de primera clase que del resto; por lo tanto, es probable que los billetes de primera clase se consideren valores extremos, de modo que analizaremos los boxplot por clase y marcaremos el límite para considerarlos *outliers* en el atributo `Fare`:
+
 ```{r}
+q3 <- quantile(x=data$Fare[data$Pclass == 1], 0.75)
 ggplot(data, aes(x=Pclass, y=Fare)) + 
   geom_boxplot() +
-  geom_hline(aes(yintercept=80), colour='red')
+  geom_hline(aes(yintercept=q3), colour='red')
 print(data[data$Fare > 200,])
 ```
-Observamos como los valores considerados outliers para `Fare` están asociados con la clase en la que viajan, mientras más alta es la clase y mayor numero de pasajeros por billete, más alta es la tarifa, por lo tanto, los valores extremos en este atributo, son valores que consideramos válidos.
+
+Observamos cómo los valores considerados *outliers* para `Fare` están asociados con la clase en la que viajan: cuanto más alta es la clase y mayor número de pasajeros comparten billete, más alta es la tarifa. Por lo tanto, los valores extremos en este atributo son valores que consideramos válidos.
 
 ```{r}
 boxplot(data$Fnumber, main="Family Number")
 boxplot.stats(data$Fnumber)$out
 ```
-Observamos como el boxplot nos cataloga como valores extremos todos aquellos pasajeros que viajasen con 3 familiares más, sin embargo no parece ser un dato incorrecto, quizá 10 familiares es un poco sospechoso, veamos los pasajeros con Fnumber = 10 existentes en el dataset
+
+Observamos cómo el boxplot nos cataloga como valores extremos todos aquellos pasajeros que viajasen con 3 familiares más. Sin embargo, no parece ser un dato incorrecto. Quizá 10 familiares es un poco sospechoso, por lo que veamos los pasajeros con `Fnumber` = 10 existentes en el *dataset*:
+
 ```{r}
 data[data$Fnumber == 10,]
 ```
-Aquí podemos observar como todos los pasajeros que viajaban con 10 familiares, eran familia, compartian billete y tarifa, por lo que los valores outliers de `Fnumber` son correctos.
+
+Aquí podemos observar cómo todos los pasajeros que viajaban con 10 familiares eran familia, compartían billete y tarifa, por lo que los valores *outliers* de `Fnumber` son correctos.
 
 ******
 # Análisis de los datos.
@@ -179,16 +194,18 @@ Aquí podemos observar como todos los pasajeros que viajaban con 10 familiares, 
 
 ## Selección de los grupos de datos que se quieren analizar/comparar (p. e., si se  van a comparar grupos de datos, ¿cuáles son estos grupos y qué tipo de análisis se van a aplicar?)
 
-Como se ha comentado al principio, vamos a trabajar con el conjunto de datos de entrenamiento y vamos a analizar la relacion que hay con la supervivencia, de los atributos `Pclass`, `Sex`, `Embarked` y `Ftype`.
+Como se ha comentado al principio, vamos a trabajar con el conjunto de datos de entrenamiento y vamos a analizar la relación existente entre la supervivencia y los atributos `Pclass`, `Sex`, `Embarked` y `Ftype`.
 
 ### Relacion entre Survived y Pclass
+
 ```{r}
 frequency_table <- table(data$Survived, data$Pclass, dnn = c("Survived", "Pclass"))
 proportions_table <- prop.table(frequency_table)
 percentages_table <- round((proportions_table * 100), 2)
 addmargins(percentages_table)
 ```
-De esta tabla de porcentajes llegamos a la conclusión de que los pasajeros que viajaban en tercera clase tenian menos posibilidades de supervivencia que los que iban en segunda y estos, menos que los que iban en primera, siendo los pasajeros de primera clase los únicos que tenian una probabilidad mayor de sobrevivir que de no sobrevivir, por lo tanto, podemos afirmar que hay una relacion entre la clase en la que se viajaba y la supervivencia.
+
+De esta tabla de porcentajes llegamos a la conclusión de que los pasajeros que viajaban en tercera clase tenían menos posibilidades de supervivencia que los que iban en segunda y estos, menos que los que iban en primera, siendo los pasajeros de primera clase los únicos que tenían una probabilidad mayor de sobrevivir que de no sobrevivir. Por lo tanto, podemos afirmar que hay una relación entre la clase en la que se viajaba y la supervivencia.
 
 ## Comprobación de la normalidad y homogeneidad de la varianza.
 
