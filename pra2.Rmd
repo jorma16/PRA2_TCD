@@ -100,12 +100,14 @@ Comprobamos ahora cuántos datos vacíos (NA) tiene cada atributo:
 ```{r}
 colSums(is.na(data))
 ```
-Nos interesa por un lado quitar aquellos registros de los cuales no tenemos la edad, ya que pensamos que es un dato que va a resultarnos de mucha utilidad en los analisis futuros y por otra parte, podemos prescindir del atributo `PassengerId` que no tiene utilidad de cara a analisis estadisticos.
+
+Podemos prescindir del atributo `PassengerId`, que no tiene utilidad de cara a análisis estadísticos:
 
 ```{r}
 data$PassengerId <- NULL
-data = data[!is.na(data$Age),]
 ```
+
+Convertimos a `Factor` las variables categóricas:
 
 ```{r}
 data$Survived <- as.factor(data$Survived)
@@ -187,12 +189,20 @@ data[data$Fnumber == 10,]
 
 Aquí podemos observar cómo todos los pasajeros que viajaban con 10 familiares eran familia, compartían billete y tarifa, por lo que los valores *outliers* de `Fnumber` son correctos.
 
+Antes de proceder con el análisis, nos interesa quitar aquellos registros de los cuales no tenemos la edad, ya que pensamos que ésta es un dato que va a resultarnos de mucha utilidad en los análisis futuros.
+
+```{r}
+data <- data[!is.na(data$Age),]
+```
+
 # Análisis de los datos.
+
 ## Selección de los grupos de datos que se quieren analizar/comparar (p. e., si se  van a comparar grupos de datos, ¿cuáles son estos grupos y qué tipo de análisis se van a aplicar?)
 
 Como se ha comentado al principio, vamos a trabajar con el conjunto de datos de entrenamiento y vamos a analizar la relación existente entre la supervivencia y los atributos `Pclass`, `Sex`, `Embarked` y `Ftype`.
 
 ### Relacion entre Survived y Pclass
+
 ```{r}
 frequency_table <- table(data$Survived, data$Pclass, dnn = c("Survived", "Pclass"))
 proportions_table <- prop.table(frequency_table)
@@ -200,9 +210,11 @@ percentages_table <- round((proportions_table * 100), 2)
 t <- addmargins(percentages_table)
 t
 ```
-De esta tabla de porcentajes llegamos a la conclusión de que los pasajeros que viajaban en tercera clase tenian menos posibilidades de supervivencia que los que iban en segunda y estos, menos que los que iban en primera, siendo los pasajeros de primera clase los únicos que tenian una probabilidad mayor de sobrevivir que de no sobrevivir, por lo tanto, podemos afirmar que hay una relacion entre la clase en la que se viajaba y la supervivencia.
+
+De esta tabla de porcentajes llegamos a la conclusión de que los pasajeros que viajaban en tercera clase tenían menos posibilidades de supervivencia que los que iban en segunda y estos, menos que los que iban en primera, siendo los pasajeros de primera clase los únicos que tenían una probabilidad mayor de sobrevivir que de no sobrevivir. Por lo tanto, podemos afirmar que hay una relación entre la clase en la que se viajaba y la supervivencia.
 
 ### Relacion entre Survived y Sex
+
 ```{r}
 frequency_table <- table(data$Survived, data$Sex, dnn = c("Survived", "Sex"))
 proportions_table <- prop.table(frequency_table)
@@ -211,10 +223,9 @@ t <- addmargins(percentages_table)
 t
 ```
 
-De esta tabla de porcentajes podemos deducir que si que habia una relacion fuerte entre el género del pasajero y su probabilidad de supervivencia, el genero `female` tenia muchas más posibilidades de sobrevivir que los demás, aquí las proporciones
-```{r}
-if (!require('ggplot2')) install.packages('ggplot2'); library('ggplot2')
+De esta tabla de porcentajes podemos deducir que había una relación fuerte entre el género del pasajero y su probabilidad de supervivencia: el género `female` tenía muchas más posibilidades de sobrevivir que el género `male`. Aquí las proporciones:
 
+```{r}
 ggplot(data, aes(x = Sex, fill = factor(Survived))) + 
   geom_bar(stat='count')+
   labs(x = 'Sex survival rate')
@@ -223,10 +234,10 @@ female_surviving_prob <- (t["1", "female"] * 100) / t["Sum", "female"]
 sprintf("Female surviving probability = %f",female_surviving_prob)
 male_surviving_prob <- (t["1", "male"] * 100) / t["Sum", "male"]
 sprintf("Male surviving probability = %f",male_surviving_prob)
-
 ```
 
 ### Relación entre Survived y Ftype
+
 ```{r}
 frequency_table <- table(data$Survived, data$Ftype, dnn = c("Survived", "Ftype"))
 proportions_table <- prop.table(frequency_table)
@@ -245,9 +256,11 @@ sprintf("Small surviving probability = %f",small_surviving_prob)
 large_surviving_prob <- (t["1", "large"] * 100) / t["Sum", "large"]
 sprintf("Large surviving probability = %f",large_surviving_prob)
 ```
-Existe también una relación bastante visible entre el tamaño de la familia y la tasa de supervivencia, siendo un 57% la tasa de supervivencia para las familias denominadas "Small" y un 16% para las familias "Large"
+
+Existe también una relación bastante visible entre el tamaño de la familia y la tasa de supervivencia, siendo un 57% la tasa de supervivencia para las familias denominadas `small` y un 16% para las familias `large`.
 
 ### Relación entre Survived y Embarked
+
 ```{r}
 frequency_table <- table(data$Survived, data$Embarked, dnn = c("Survived", "Embarked"))
 proportions_table <- prop.table(frequency_table)
@@ -266,62 +279,71 @@ sprintf("Q surviving probability = %f",Q_surviving_prob)
 S_surviving_prob <- (t["1", "S"] * 100) / t["Sum", "S"]
 sprintf("S surviving probability = %f",S_surviving_prob)
 ```
-En este gráfico podemos observar como la mayoría de pasajeros embarkaron en el puerto `S`, sin embargo también observamos que sobrevivió un mayor porcentaje (55%), esto puede ser debido a multiples factores como la clase de ticket que tenia la gente que embarcaba en ese puerto o el tipo de familias.
+
+En este gráfico podemos observar cómo la mayoría de pasajeros embarcaron en el puerto `S`. Sin embargo, también observamos que sobrevivió un mayor porcentaje (55%). Esto puede ser debido a múltiples factores, como la clase de *ticket* que tenía la gente que embarcaba en ese puerto o el tipo de familias.
 
 ## Comprobación de la normalidad y homogeneidad de la varianza.
 
-Vamos a comprobar la normalidad de los atributos numéricos aplicando el Test Shapiro-Wilk que servia para contrastar si los datos seguian una distribución normal, vamos a utilizarlo en la variable `Age`
+Vamos a comprobar la normalidad de los atributos numéricos aplicando el Test Shapiro-Wilk, que sirve para contrastar si los datos siguen una distribución normal. Vamos a utilizarlo en la variable `Age`:
 
-Hipótesis nula ($H_o$): Los datos de la muestra *no son diferentes* a una distribución normal
-Hipótesis alternativa ($H_1$): Los datos de la muestra *son diferentes* a una distribución normal
+* Hipótesis nula ($H_o$): Los datos de la muestra *no son diferentes* a una distribución normal.
+* Hipótesis alternativa ($H_1$): Los datos de la muestra *son diferentes* a una distribución normal.
 
-Aceptaremos la hipótesis nula cuando el p-value que nos devuelva el test sea mayor a 0.05 (p_value > 0.05)
-Rechazaremos la hipótesis nula, por lo tanto, aceptamos la alternativa en caso contrario (p_value < 0.05)
+Aceptaremos la hipótesis nula cuando el p-value que nos devuelva el test sea mayor a 0.05 (p_value > 0.05).
+
+Rechazaremos la hipótesis nula (por lo tanto, aceptamos la alternativa) en caso contrario (p_value < 0.05).
 
 ```{r}
 print(shapiro.test(data$Age))
 print(shapiro.test(data$Fnumber))
 print(shapiro.test(data$Fare))
 ```
-Dados los resultados de los distintos tests podemos afirmar que ninguno de los atributos numéricos del dataset siguen una distribución normal.
 
-A continuación vamos a realizar pruebas para comprobar la homogeneidad de la varianza, también conocida como homocedasticidad, existen diferentes tests para esto, nosotros vamos a utilizar el test de Fligner-Killeen, que se trata de un test que compara varianzas basandose en la mediana, para determinar si las dos poblaciones tienen una varianza similar en función de la supervivencia, además este tipo de test es aplicable cuando no se cumple la normalidad en la muestra, como hemos demostrado anteriormente que es nuestro caso para la variable `Age`
+Dados los resultados de los distintos tests podemos afirmar que ninguno de los atributos numéricos del *dataset* sigue una distribución normal.
+
+A continuación vamos a realizar pruebas para comprobar la homogeneidad de la varianza, también conocida como homocedasticidad. Existen diferentes tests para esto; nosotros vamos a utilizar el test de Fligner-Killeen (que se trata de un test que compara varianzas basándose en la mediana) para determinar si las dos poblaciones tienen una varianza similar en función de la supervivencia. Además, este tipo de test es aplicable cuando no se cumple la normalidad en la muestra, como hemos demostrado anteriormente que es nuestro caso para la variable `Age`.
  
-Hipótesis nula ($H_0$): Las varianzas de todas las poblaciones son iguales
-Hipótesis alternativa ($H_1$): Alguna varianza difiere del resto
+* Hipótesis nula ($H_0$): Las varianzas de todas las poblaciones son iguales.
+* Hipótesis alternativa ($H_1$): Alguna varianza difiere del resto.
 
 ```{r}
 a <- data[data$Survived == "0", "Age"]
 b <- data[data$Survived == "1", "Age"]
 fligner.test(x = list(a,b))
 ```
-En este caso, p-value > 0.05 por lo tanto aceptamos la hipótesis nula, lo que significa que las varianzas de las poblaciones son iguales, por lo tanto existe homocedasticidad
+
+En este caso, p-value > 0.05 por lo tanto aceptamos la hipótesis nula, lo que significa que las varianzas de las poblaciones son iguales; por lo tanto existe homocedasticidad.
 
 ## Aplicación de pruebas estadísticas para comparar los grupos de datos. En función de los datos y el objetivo del estudio, aplicar pruebas de contraste de hipótesis, correlaciones, regresiones, etc. Aplicar al menos tres métodos de análisis diferentes.
 
-A continuación vamos a aplicar contrastes de hipótesis sobre las muestras para determinar si un factor influye en la supervivencia, las hipótesis nula y alternativa de nuestros contrastes son:
+A continuación vamos a aplicar contrastes de hipótesis sobre las muestras para determinar si un factor influye en la supervivencia. Las hipótesis nula y alternativa de nuestros contrastes son:
 
-Hipótesis nula ($H_0$): Los dos factores son independientes
-Hipótesis alternative ($H_1$): Los factores son dependientes
+* Hipótesis nula ($H_0$): Los dos factores son independientes.
+* Hipótesis alternativá ($H_1$): Los factores son dependientes.
 
 ```{r}
-frec = table(data$Survived, data$Sex)
+frec <- table(data$Survived, data$Sex)
 chisq.test(frec)
 ```
-Obtenemos un p-value < 0.05, por lo tanto rechazamos la hipótesis nula en favor de la alternativa, y llegamos a la conclusión de que los factores Age y Survived son dependientes.
 
-Ahora vamos a comprobar la correlacion entre todas las variables numéricas para observar si el precio del billete estaba relacionado con el numero de familiares a bordo.
+Obtenemos un p-value < 0.05, por lo tanto rechazamos la hipótesis nula en favor de la alternativa y llegamos a la conclusión de que los factores `Age` y `Survived` son dependientes.
+
+Ahora vamos a comprobar la correlación entre todas las variables numéricas para observar si el precio del billete estaba relacionado con el número de familiares a bordo:
 
 ```{r}
 if (!require('dplyr')) install.packages('dplyr'); library('dplyr')
 if (!require('corrplot')) install.packages('corrplot'); library('corrplot')
+
 d <- select_if(data, is.numeric)
 M <- cor(d)
 corrplot(M)
 ```
-De la matriz de correlacion podemos deducir que los datos no están muy correlacionados, existe una ligera relacion entre Fnumber y Fare y entre Fare y Age pero no es significativa.
 
-Por último vamos a aplicar la regresion logistica debido a que queremos predecir una variable categorica `Survived` que puede tomar solo dos valores, por lo tanto, la regresion lineal queda descartada, de los datos que hemos visto y analizado a lo largo de toda la práctica, podemos deducir que la edad (Age), el sexo (Sex), la clase (Pclass), el puerto de embarque (Embarked) y el tamaño de familia a bordo (Ftype) influyen en la supervivencia, por lo tanto van a ser nuestras variables independientes y el atributo Survived es nuestra variable dependiente.
+De la matriz de correlación podemos deducir que los datos no están muy correlacionados. Existe una ligera relación entre `Fnumber` y `Fare` y entre `Fare` y `Age`, pero no es significativa.
+
+Por último, vamos a aplicar la regresión logística debido a que queremos predecir una variable categórica (`Survived`), que puede tomar solo dos valores. Por lo tanto, la regresión lineal queda descartada.
+
+De los datos que hemos visto y analizado a lo largo de toda la práctica, podemos deducir que la edad (`Age`), el sexo (`Sex`), la clase (`Pclass`), el puerto de embarque (`Embarked`) y el tamaño de familia a bordo (`Ftype`) influyen en la supervivencia. Por lo tanto, van a ser nuestras variables independientes, y el atributo `Survived` es nuestra variable dependiente.
 
 ```{r}
 model <- glm(
@@ -339,10 +361,13 @@ model2 <- glm(
 summary(model)
 summary(model2)
 ```
-Si comparamos la bondad del ajuste de estos dos modelos (AIC) vemos que el primer modelo, el que tenia más variables tiene un AIC menor, por lo tanto la bondad de ajuste es mejor, deberiamos optar por model1
+
+Si comparamos la bondad del ajuste de estos dos modelos (AIC) vemos que el primer modelo, el que tenía más variables, tiene un AIC menor. Por lo tanto, la bondad de ajuste es mejor; deberíamos optar por el primer modelo.
 
 # Representación de los resultados a partir de tablas y gráficas. Este apartado se puede responder a lo largo de la práctica, sin necesidad de concentrar todas las representaciones en este punto de la práctica.
+
 Los diferentes gráficos y tablas los hemos ido incluyendo a lo largo de toda la práctica.
 
 # Resolución del problema. A partir de los resultados obtenidos, ¿cuáles son las conclusiones? ¿Los resultados permiten responder al problema?
-Al principio de la practica nos hemos planteado responder a la pregunta acerca de si habian caracteristicas de los pasajeros que impactaban sobre la tasa de supervivencia, a lo largo del trabajo nos hemos ido respondiendo y finalmente con la aplicación de un modelo de regresión logistica hemos visto que si, hemos a la conclusión de que factores como el tamaño de familia, el sexo o la clase en la que se viajó afectaron a la tasa de supervivencia, tenias más probabilidades de sobrevivir si viajabas en primera clase, eras una mujer y viajabas en una familia pequeña, mientras que el peor caso de supervivencia eran hombres, de familias grandes en tercera clase.
+
+Al principio de la práctica nos hemos planteado responder a la pregunta acerca de si había características de los pasajeros que impactaban sobre la tasa de supervivencia. A lo largo del trabajo, las hemos ido respondiendo y, finalmente, con la aplicación de un modelo de regresión logística, hemos visto que sí y hemos a la conclusión de que factores como el tamaño de familia, el sexo o la clase en la que se viajó afectaron a la tasa de supervivencia: los pasajeros tenían más probabilidades de sobrevivir si viajaban en primera clase, eran mujer y viajaban en una familia pequeña, mientras que el peor caso de supervivencia eran hombres de familias grandes que viajaban en tercera clase.
