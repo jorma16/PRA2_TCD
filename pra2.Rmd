@@ -7,6 +7,7 @@ date: "mayo 2022"
 output:
   pdf_document:
     highlight: zenburn
+    number_sections: yes
     toc: yes
   html_document:
     highlight: default
@@ -41,38 +42,45 @@ str(data)
 
 Los atributos que encontramos son:
 
-* **PassengerId**: Es el identificador interno del pasajero, de tipo entero
-* **Survived**: Es un valor de tipo entero que nos indica si el pasajero ha sobrevivido o no (0 o 1)
-* **Pclass**: El tipo de billete que ha adquirido el pasajero, tipo entero	(1 = Primera, 2 = Segunda, 3 = Tercera)
-* **Name**: El nombre del pasajero, tipo char
-* **Sex**: El género del pasajero, tipo char (male o female)
-* **Age**: La edad del pasajero, tipo number
-* **SibSp**: El numero de hermanos y conyuges que hay abordo en el Titanic, tipo entero
-* **Parch**: El número de padres e hijos que hay abordo en el Titanic, tipo entero
-* **Ticket**: El identificador del billete, tipo char
-* **Fare**: El precio del billete, tipo number
-* **Cabin**: El código del camarote, tipo char
-* **Embarked**: El puerto donde embarco el pasajero, tipo char (C = Cherbourg, Q = Queenstown, S = Southampton)
+-   **PassengerId**: Es el identificador interno del pasajero, de tipo entero
+-   **Survived**: Es un valor de tipo entero que nos indica si el pasajero ha sobrevivido o no (0 o 1)
+-   **Pclass**: El tipo de billete que ha adquirido el pasajero, tipo entero (1 = Primera, 2 = Segunda, 3 = Tercera)
+-   **Name**: El nombre del pasajero, tipo char
+-   **Sex**: El género del pasajero, tipo char (male o female)
+-   **Age**: La edad del pasajero, tipo number
+-   **SibSp**: El numero de hermanos y conyuges que hay abordo en el Titanic, tipo entero
+-   **Parch**: El número de padres e hijos que hay abordo en el Titanic, tipo entero
+-   **Ticket**: El identificador del billete, tipo char
+-   **Fare**: El precio del billete, tipo number
+-   **Cabin**: El código del camarote, tipo char
+-   **Embarked**: El puerto donde embarco el pasajero, tipo char (C = Cherbourg, Q = Queenstown, S = Southampton)
 
-# Integración y selección de los datos de interés a analizar. Puede ser el resultado de  adicionar diferentes datasets o una subselección útil de los datos originales, en base al  objetivo que se quiera conseguir.
+```{r}
+summary(data)
+```
+Con esta funcion `summary` podemos observar la cantidad de valores NA, que vemos que en `Age` hay presentes bastantes valores vacios
+
+
+# Integración y selección de los datos de interés a analizar. Puede ser el resultado de adicionar diferentes datasets o una subselección útil de los datos originales, en base al objetivo que se quiera conseguir.
 
 De los atributos presentados, sin realizar ningún trabajo previo, consideramos que la siguiente lista de atributos no es relevante para el análisis estadístico que queremos llevar a cabo:
 
-* **PassengerId**: La podemos eliminar del conjunto de datos ya que no contribuye a la supervivencia del pasajero
-* **Ticket**: Por los mismos de PassengerId, consideramos que los identificadores internos no afectan a la supervivencia
-* **Name**: Por si solo el nombre del pasajero creemos que no aporta nada a la supervivencia del mismo, sin embargo observamos que todos los nombres siguen un formato determinado y que todos contienen el titulo que se aplica a la persona, por lo tanto podríamos extraer esta característica para contar con un *dataset* con más información con la que trabajar.
-* **Cabin**: Del camarote podemos llegar a saber qué pasajeros viajaban en el mismo y si han sobrevivido o no, por lo tanto podemos saber si el camarote o el tipo de camarote están relacionados con una mayor supervivencia.
-* **SibSp y Parch**: Estas dos variables podemos condensarlas en una sola, que hace referencia al número de familiares que el pasajero tenía a bordo.
+-   **PassengerId**: La podemos eliminar del conjunto de datos ya que no contribuye a la supervivencia del pasajero
+-   **Ticket**: Por los mismos de PassengerId, consideramos que los identificadores internos no afectan a la supervivencia
+-   **Name**: Por si solo el nombre del pasajero creemos que no aporta nada a la supervivencia del mismo, sin embargo observamos que todos los nombres siguen un formato determinado y que todos contienen el titulo que se aplica a la persona, por lo tanto podríamos extraer esta característica para contar con un *dataset* con más información con la que trabajar.
+-   **Cabin**: Del camarote podemos llegar a saber qué pasajeros viajaban en el mismo y si han sobrevivido o no, por lo tanto podemos saber si el camarote o el tipo de camarote están relacionados con una mayor supervivencia.
+-   **SibSp y Parch**: Estas dos variables podemos condensarlas en una sola, que hace referencia al número de familiares que el pasajero tenía a bordo.
 
 # Limpieza de los datos.
+
 ## ¿Los datos contienen ceros o elementos vacíos? Gestiona cada uno de estos casos.
 
 Del análisis del fichero que contiene el *dataset* `train.csv` podemos extraer la siguiente información:
 
-1. Algunas cadenas de caracteres tienen espacios en blanco al inicio y/o final.
-2. Los valores decimales están separados por el carácter ".".
-3. La edad puede contener valores decimales al ser de tipo number y no entero.
-4. El separador de columnas es el carácter ",".
+1.  Algunas cadenas de caracteres tienen espacios en blanco al inicio y/o final.
+2.  Los valores decimales están separados por el carácter ".".
+3.  La edad puede contener valores decimales al ser de tipo number y no entero.
+4.  El separador de columnas es el carácter ",".
 
 Para la limpieza de los datos resulta interesante conocer qué atributos contienen valores vacíos:
 
@@ -82,11 +90,11 @@ colSums(data == "")
 
 Con esta información y con lo que conocemos del *dataset* podemos concluir que las siguientes transformaciones serían interesantes con el objetivo de facilitar el análisis:
 
-1. El atributo `Survived` debería ser un factor debido a que es cualitativa con valores `1` y `0`
-2. El atributo `Pclass` debería ser un factor debido a que es cualitativa con valores `1`, `2` y `3`
-3. El atributo `Sex` debería ser un factor debido a que es cualitativa con valores `male` y `female`
-4. El atributo `Embarked` debería ser un factor debido a que es cualitativa con valores `C`, `Q` y `S`, además de que deberíamos cambiar los valores vacíos por `NA`
-5. El atributo `Cabin` contiene valores vacíos por lo que hay que reemplazarlos por `NA`.
+1.  El atributo `Survived` debería ser un factor debido a que es cualitativa con valores `1` y `0`
+2.  El atributo `Pclass` debería ser un factor debido a que es cualitativa con valores `1`, `2` y `3`
+3.  El atributo `Sex` debería ser un factor debido a que es cualitativa con valores `male` y `female`
+4.  El atributo `Embarked` debería ser un factor debido a que es cualitativa con valores `C`, `Q` y `S`, además de que deberíamos cambiar los valores vacíos por `NA`
+5.  El atributo `Cabin` contiene valores vacíos por lo que hay que reemplazarlos por `NA`.
 
 En primer lugar, deberíamos reemplazar los valores que consideramos vacíos por `NA`:
 
@@ -100,6 +108,7 @@ Comprobamos ahora cuántos datos vacíos (NA) tiene cada atributo:
 ```{r}
 colSums(is.na(data))
 ```
+
 Nos interesa por un lado quitar aquellos registros de los cuales no tenemos la edad, ya que pensamos que es un dato que va a resultarnos de mucha utilidad en los analisis futuros y por otra parte, podemos prescindir del atributo `PassengerId` que no tiene utilidad de cara a analisis estadisticos.
 
 ```{r}
@@ -188,11 +197,13 @@ data[data$Fnumber == 10,]
 Aquí podemos observar cómo todos los pasajeros que viajaban con 10 familiares eran familia, compartían billete y tarifa, por lo que los valores *outliers* de `Fnumber` son correctos.
 
 # Análisis de los datos.
-## Selección de los grupos de datos que se quieren analizar/comparar (p. e., si se  van a comparar grupos de datos, ¿cuáles son estos grupos y qué tipo de análisis se van a aplicar?)
+
+## Selección de los grupos de datos que se quieren analizar/comparar (p. e., si se van a comparar grupos de datos, ¿cuáles son estos grupos y qué tipo de análisis se van a aplicar?)
 
 Como se ha comentado al principio, vamos a trabajar con el conjunto de datos de entrenamiento y vamos a analizar la relación existente entre la supervivencia y los atributos `Pclass`, `Sex`, `Embarked` y `Ftype`.
 
 ### Relacion entre Survived y Pclass
+
 ```{r}
 frequency_table <- table(data$Survived, data$Pclass, dnn = c("Survived", "Pclass"))
 proportions_table <- prop.table(frequency_table)
@@ -200,9 +211,11 @@ percentages_table <- round((proportions_table * 100), 2)
 t <- addmargins(percentages_table)
 t
 ```
+
 De esta tabla de porcentajes llegamos a la conclusión de que los pasajeros que viajaban en tercera clase tenian menos posibilidades de supervivencia que los que iban en segunda y estos, menos que los que iban en primera, siendo los pasajeros de primera clase los únicos que tenian una probabilidad mayor de sobrevivir que de no sobrevivir, por lo tanto, podemos afirmar que hay una relacion entre la clase en la que se viajaba y la supervivencia.
 
 ### Relacion entre Survived y Sex
+
 ```{r}
 frequency_table <- table(data$Survived, data$Sex, dnn = c("Survived", "Sex"))
 proportions_table <- prop.table(frequency_table)
@@ -212,6 +225,7 @@ t
 ```
 
 De esta tabla de porcentajes podemos deducir que si que habia una relacion fuerte entre el género del pasajero y su probabilidad de supervivencia, el genero `female` tenia muchas más posibilidades de sobrevivir que los demás, aquí las proporciones
+
 ```{r}
 if (!require('ggplot2')) install.packages('ggplot2'); library('ggplot2')
 
@@ -227,6 +241,7 @@ sprintf("Male surviving probability = %f",male_surviving_prob)
 ```
 
 ### Relación entre Survived y Ftype
+
 ```{r}
 frequency_table <- table(data$Survived, data$Ftype, dnn = c("Survived", "Ftype"))
 proportions_table <- prop.table(frequency_table)
@@ -245,9 +260,11 @@ sprintf("Small surviving probability = %f",small_surviving_prob)
 large_surviving_prob <- (t["1", "large"] * 100) / t["Sum", "large"]
 sprintf("Large surviving probability = %f",large_surviving_prob)
 ```
+
 Existe también una relación bastante visible entre el tamaño de la familia y la tasa de supervivencia, siendo un 57% la tasa de supervivencia para las familias denominadas "Small" y un 16% para las familias "Large"
 
 ### Relación entre Survived y Embarked
+
 ```{r}
 frequency_table <- table(data$Survived, data$Embarked, dnn = c("Survived", "Embarked"))
 proportions_table <- prop.table(frequency_table)
@@ -266,6 +283,7 @@ sprintf("Q surviving probability = %f",Q_surviving_prob)
 S_surviving_prob <- (t["1", "S"] * 100) / t["Sum", "S"]
 sprintf("S surviving probability = %f",S_surviving_prob)
 ```
+
 En este gráfico podemos observar como la mayoría de pasajeros embarkaron en el puerto `S`, sin embargo también observamos que sobrevivió un mayor porcentaje (55%), esto puede ser debido a multiples factores como la clase de ticket que tenia la gente que embarcaba en ese puerto o el tipo de familias.
 
 ## Comprobación de la normalidad y homogeneidad de la varianza.
@@ -273,21 +291,23 @@ En este gráfico podemos observar como la mayoría de pasajeros embarkaron en el
 Vamos a comprobar la normalidad de los atributos numéricos aplicando el Test Shapiro-Wilk que servia para contrastar si los datos seguian una distribución normal, vamos a utilizarlo en la variable `Age`
 
 Hipótesis nula ($H_o$): Los datos de la muestra *no son diferentes* a una distribución normal
+
 Hipótesis alternativa ($H_1$): Los datos de la muestra *son diferentes* a una distribución normal
 
-Aceptaremos la hipótesis nula cuando el p-value que nos devuelva el test sea mayor a 0.05 (p_value > 0.05)
-Rechazaremos la hipótesis nula, por lo tanto, aceptamos la alternativa en caso contrario (p_value < 0.05)
+Aceptaremos la hipótesis nula cuando el p-value que nos devuelva el test sea mayor a 0.05 (p_value \> 0.05) Rechazaremos la hipótesis nula, por lo tanto, aceptamos la alternativa en caso contrario (p_value \< 0.05)
 
 ```{r}
 print(shapiro.test(data$Age))
 print(shapiro.test(data$Fnumber))
 print(shapiro.test(data$Fare))
 ```
+
 Dados los resultados de los distintos tests podemos afirmar que ninguno de los atributos numéricos del dataset siguen una distribución normal.
 
 A continuación vamos a realizar pruebas para comprobar la homogeneidad de la varianza, también conocida como homocedasticidad, existen diferentes tests para esto, nosotros vamos a utilizar el test de Fligner-Killeen, que se trata de un test que compara varianzas basandose en la mediana, para determinar si las dos poblaciones tienen una varianza similar en función de la supervivencia, además este tipo de test es aplicable cuando no se cumple la normalidad en la muestra, como hemos demostrado anteriormente que es nuestro caso para la variable `Age`
- 
+
 Hipótesis nula ($H_0$): Las varianzas de todas las poblaciones son iguales
+
 Hipótesis alternativa ($H_1$): Alguna varianza difiere del resto
 
 ```{r}
@@ -295,20 +315,23 @@ a <- data[data$Survived == "0", "Age"]
 b <- data[data$Survived == "1", "Age"]
 fligner.test(x = list(a,b))
 ```
-En este caso, p-value > 0.05 por lo tanto aceptamos la hipótesis nula, lo que significa que las varianzas de las poblaciones son iguales, por lo tanto existe homocedasticidad
+
+En este caso, p-value \> 0.05 por lo tanto aceptamos la hipótesis nula, lo que significa que las varianzas de las poblaciones son iguales, por lo tanto existe homocedasticidad
 
 ## Aplicación de pruebas estadísticas para comparar los grupos de datos. En función de los datos y el objetivo del estudio, aplicar pruebas de contraste de hipótesis, correlaciones, regresiones, etc. Aplicar al menos tres métodos de análisis diferentes.
 
 A continuación vamos a aplicar contrastes de hipótesis sobre las muestras para determinar si un factor influye en la supervivencia, las hipótesis nula y alternativa de nuestros contrastes son:
 
 Hipótesis nula ($H_0$): Los dos factores son independientes
-Hipótesis alternative ($H_1$): Los factores son dependientes
+
+Hipótesis alternativa ($H_1$): Los factores son dependientes
 
 ```{r}
 frec = table(data$Survived, data$Sex)
 chisq.test(frec)
 ```
-Obtenemos un p-value < 0.05, por lo tanto rechazamos la hipótesis nula en favor de la alternativa, y llegamos a la conclusión de que los factores Age y Survived son dependientes.
+
+Obtenemos un p-value \< 0.05, por lo tanto rechazamos la hipótesis nula en favor de la alternativa, y llegamos a la conclusión de que los factores Age y Survived son dependientes.
 
 Ahora vamos a comprobar la correlacion entre todas las variables numéricas para observar si el precio del billete estaba relacionado con el numero de familiares a bordo.
 
@@ -319,6 +342,7 @@ d <- select_if(data, is.numeric)
 M <- cor(d)
 corrplot(M)
 ```
+
 De la matriz de correlacion podemos deducir que los datos no están muy correlacionados, existe una ligera relacion entre Fnumber y Fare y entre Fare y Age pero no es significativa.
 
 Por último vamos a aplicar la regresion logistica debido a que queremos predecir una variable categorica `Survived` que puede tomar solo dos valores, por lo tanto, la regresion lineal queda descartada, de los datos que hemos visto y analizado a lo largo de toda la práctica, podemos deducir que la edad (Age), el sexo (Sex), la clase (Pclass), el puerto de embarque (Embarked) y el tamaño de familia a bordo (Ftype) influyen en la supervivencia, por lo tanto van a ser nuestras variables independientes y el atributo Survived es nuestra variable dependiente.
@@ -339,10 +363,27 @@ model2 <- glm(
 summary(model)
 summary(model2)
 ```
+
 Si comparamos la bondad del ajuste de estos dos modelos (AIC) vemos que el primer modelo, el que tenia más variables tiene un AIC menor, por lo tanto la bondad de ajuste es mejor, deberiamos optar por model1
 
 # Representación de los resultados a partir de tablas y gráficas. Este apartado se puede responder a lo largo de la práctica, sin necesidad de concentrar todas las representaciones en este punto de la práctica.
+
 Los diferentes gráficos y tablas los hemos ido incluyendo a lo largo de toda la práctica.
 
 # Resolución del problema. A partir de los resultados obtenidos, ¿cuáles son las conclusiones? ¿Los resultados permiten responder al problema?
+
 Al principio de la practica nos hemos planteado responder a la pregunta acerca de si habian caracteristicas de los pasajeros que impactaban sobre la tasa de supervivencia, a lo largo del trabajo nos hemos ido respondiendo y finalmente con la aplicación de un modelo de regresión logistica hemos visto que si, hemos a la conclusión de que factores como el tamaño de familia, el sexo o la clase en la que se viajó afectaron a la tasa de supervivencia, tenias más probabilidades de sobrevivir si viajabas en primera clase, eras una mujer y viajabas en una familia pequeña, mientras que el peor caso de supervivencia eran hombres, de familias grandes en tercera clase.
+
+# Almacenamiento del fichero resultante
+
+```{r}
+write.csv(data, "./output_files/output.csv", row.names=TRUE)
+```
+
+# Tabla de contribuciones
+
+| Contribuciones | Firma |
+|----------------|-------|
+| Investigación previa | Rafael Jiménez Sarmentero, Jorge Marchán Gutiérrez |
+| Redacción de las respuestas | Rafael Jiménez Sarmentero, Jorge Marchán Gutiérrez |
+| Desarrollo código | Rafael Jiménez Sarmentero, Jorge Marchán Gutiérrez |
